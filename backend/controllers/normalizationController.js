@@ -27,34 +27,63 @@ export const suggestNormalization = async (req, res) => {
     const parsed = await parseUploadedFile(filePath, dataset.original_name);
     const profile = profileDataset(parsed.headers, parsed.rows);
 
-    // Fetch confirmed FDs from database or request body
+    // Fetch confirmed FDs from relational tables if not provided in body
     let dependencies = confirmedDependencies;
-    if (!dependencies) {
+    if (!dependencies || !Array.isArray(dependencies) || dependencies.length === 0) {
       const [fdRows] = await systemPool.query(
-        `SELECT determinant, dependent, determinism_ratio FROM functional_dependencies WHERE dataset_id = ? AND is_confirmed = 1`,
+        `SELECT 
+          fd.id,
+          fd.determinism_ratio,
+          fd.is_confirmed,
+          (SELECT GROUP_CONCAT(dc.column_name ORDER BY dc.column_index SEPARATOR '||')
+           FROM fd_determinants fdd
+           JOIN dataset_columns dc ON fdd.column_id = dc.id
+           WHERE fdd.fd_id = fd.id) as determinant_str,
+          (SELECT GROUP_CONCAT(dc.column_name ORDER BY dc.column_index SEPARATOR '||')
+           FROM fd_dependents fdd
+           JOIN dataset_columns dc ON fdd.column_id = dc.id
+           WHERE fdd.fd_id = fd.id) as dependent_str
+         FROM functional_dependencies fd
+         WHERE fd.dataset_id = ? AND fd.is_confirmed = 1`,
         [id]
       );
-      dependencies = fdRows.map(row => ({
-        determinant: typeof row.determinant === 'string' ? JSON.parse(row.determinant) : row.determinant,
-        dependents: typeof row.dependent === 'string' ? JSON.parse(row.dependent) : row.dependent,
-        confidence: parseFloat(row.determinism_ratio)
-      }));
+
+      if (fdRows.length > 0) {
+        dependencies = fdRows.map(row => ({
+          determinant: row.determinant_str ? row.determinant_str.split('||') : [],
+          dependents: row.dependent_str ? row.dependent_str.split('||') : [],
+          confidence: parseFloat(row.determinism_ratio) || 1.0
+        })).filter(fd => fd.determinant.length > 0 && fd.dependents.length > 0);
+      }
     }
 
-    // Fallback if no confirmed FDs exist yet
+    // Fallback: If no confirmed FDs, load all discovered FDs for this dataset
     if (!dependencies || dependencies.length === 0) {
       const [allFdRows] = await systemPool.query(
-        `SELECT determinant, dependent, determinism_ratio FROM functional_dependencies WHERE dataset_id = ?`,
+        `SELECT 
+          fd.id,
+          fd.determinism_ratio,
+          (SELECT GROUP_CONCAT(dc.column_name ORDER BY dc.column_index SEPARATOR '||')
+           FROM fd_determinants fdd
+           JOIN dataset_columns dc ON fdd.column_id = dc.id
+           WHERE fdd.fd_id = fd.id) as determinant_str,
+          (SELECT GROUP_CONCAT(dc.column_name ORDER BY dc.column_index SEPARATOR '||')
+           FROM fd_dependents fdd
+           JOIN dataset_columns dc ON fdd.column_id = dc.id
+           WHERE fdd.fd_id = fd.id) as dependent_str
+         FROM functional_dependencies fd
+         WHERE fd.dataset_id = ?`,
         [id]
       );
+
       dependencies = allFdRows.map(row => ({
-        determinant: typeof row.determinant === 'string' ? JSON.parse(row.determinant) : row.determinant,
-        dependents: typeof row.dependent === 'string' ? JSON.parse(row.dependent) : row.dependent,
-        confidence: parseFloat(row.determinism_ratio)
-      }));
+        determinant: row.determinant_str ? row.determinant_str.split('||') : [],
+        dependents: row.dependent_str ? row.dependent_str.split('||') : [],
+        confidence: parseFloat(row.determinism_ratio) || 1.0
+      })).filter(fd => fd.determinant.length > 0 && fd.dependents.length > 0);
     }
 
-    // Run Academic Normalization Engine
+    // Run Academic Normalization Engine (Bernstein's 3NF Synthesis)
     const normalizationResult = normalizeDataset({
       headers: parsed.headers,
       rows: parsed.rows,
@@ -63,7 +92,7 @@ export const suggestNormalization = async (req, res) => {
       chosenPrimaryKey: userPrimaryKey
     });
 
-    const targetDatabaseName = `smartdb_ds_${dataset.id}_${Date.now().toString(36)}`;
+    const targetDatabaseName = `smartdb_ds_${dataset.id}`;
     const { sqlScript, sortedTables } = generateFullMigrationSQL(targetDatabaseName, normalizationResult.tables);
 
     return res.json({

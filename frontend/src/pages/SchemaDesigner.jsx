@@ -78,12 +78,12 @@ const SchemaDesignerPage = ({ activeDataset, initialSchema, onNavigate, onMigrat
       });
 
       if (res.success) {
-        setMigrationStatus('Migration completed successfully! Redirecting to live database exports...');
+        setMigrationStatus('Migration completed successfully! Redirecting to live database record manager (CRUD)...');
         if (onMigrationSuccess) {
           onMigrationSuccess(res.result);
         }
         setTimeout(() => {
-          onNavigate('export');
+          onNavigate('crud');
         }, 1000);
       } else {
         setError(res.message || 'Migration failed');

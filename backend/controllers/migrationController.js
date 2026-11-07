@@ -11,7 +11,7 @@ const UPLOADS_DIR = path.resolve(__dirname, '../uploads');
 export const runMigration = async (req, res) => {
   try {
     const { id } = req.params;
-    const { targetDatabaseName, tables, relationships } = req.body;
+    const { targetDatabaseName, tables, relationships, steps } = req.body;
 
     if (!tables || !Array.isArray(tables) || tables.length === 0) {
       return res.status(400).json({ success: false, message: 'Invalid or missing tables schema' });
@@ -35,7 +35,8 @@ export const runMigration = async (req, res) => {
       targetDatabaseName: finalDbName,
       tables,
       relationships: relationships || [],
-      originalRows: parsed.rows
+      originalRows: parsed.rows,
+      normalizationSteps: steps || []
     });
 
     return res.json({
@@ -77,7 +78,7 @@ export const getMigrationStatus = async (req, res) => {
         for (const t of tables) {
           const tableName = Object.values(t)[0];
           const [cntResult] = await pool.query(`SELECT COUNT(*) as count FROM \`${tableName}\``);
-          const [sampleRows] = await pool.query(`SELECT * FROM \`${tableName}\` LIMIT 5`);
+          const [sampleRows] = await pool.query(`SELECT * FROM \`${tableName}\` LIMIT 10`);
           liveTableData.push({
             tableName,
             rowCount: cntResult[0].count,

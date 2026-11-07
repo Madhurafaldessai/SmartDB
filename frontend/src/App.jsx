@@ -6,6 +6,7 @@ import UploadPage from './pages/Upload';
 import AnalysisPage from './pages/Analysis';
 import NormalizationPage from './pages/Normalization';
 import SchemaDesignerPage from './pages/SchemaDesigner';
+import DatabaseCRUDPage from './pages/DatabaseCRUD';
 import ExportPage from './pages/Export';
 
 function App() {
@@ -90,6 +91,13 @@ function App() {
                 initialSchema={activeSchema}
                 onNavigate={setActiveTab}
                 onMigrationSuccess={handleMigrationSuccess}
+              />
+            )}
+
+            {activeTab === 'crud' && (
+              <DatabaseCRUDPage
+                activeDataset={activeDataset}
+                onNavigate={setActiveTab}
               />
             )}
 

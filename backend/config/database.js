@@ -26,7 +26,7 @@ const SYSTEM_DB_NAME = process.env.DB_SYSTEM_NAME || 'smartdb_system';
 // Dynamic pool cache to prevent connection leaks
 const poolCache = new Map();
 
-// Base server pool (not bound to specific database) to allow CREATE DATABASE
+// Base server pool (not bound to specific database) to allow CREATE / DROP DATABASE
 export const rootPool = mysql.createPool({
   ...dbConfig
 });
@@ -62,6 +62,19 @@ export const getDatasetPool = (databaseName) => {
 
   poolCache.set(databaseName, pool);
   return pool;
+};
+
+// Closes and unregisters a dataset pool (called on dataset deletion)
+export const closeDatasetPool = async (databaseName) => {
+  if (poolCache.has(databaseName)) {
+    const pool = poolCache.get(databaseName);
+    try {
+      await pool.end();
+    } catch (e) {
+      console.warn(`Error closing pool for ${databaseName}:`, e.message);
+    }
+    poolCache.delete(databaseName);
+  }
 };
 
 // Ensure system database and metadata tables exist on server startup
@@ -102,4 +115,3 @@ export const testConnection = async () => {
     return { connected: false, error: err.message };
   }
 };
-

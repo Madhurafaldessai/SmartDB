@@ -5,27 +5,21 @@ import {
   GitFork,
   ArrowRight,
   CheckCircle2,
-  AlertTriangle,
-  ShieldCheck,
   RefreshCw,
-  Sparkles,
   Search,
-  Sliders,
   Check,
-  X,
-  FileWarning
+  X
 } from 'lucide-react';
 import { analyzeDataset, updateFunctionalDependencies } from '../services/api';
 
 const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('dependencies'); // 'dependencies' | 'columns' | 'ml_quality'
+  const [activeTab, setActiveTab] = useState('dependencies'); // 'dependencies' | 'columns'
   const [profileData, setProfileData] = useState(null);
   const [dependencies, setDependencies] = useState([]);
   const [primaryKey, setPrimaryKey] = useState([]);
   const [candidateKeys, setCandidateKeys] = useState([]);
   const [minimalCover, setMinimalCover] = useState([]);
-  const [dataQuality, setDataQuality] = useState(null);
   const [saving, setSaving] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
 
@@ -39,7 +33,6 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
         setPrimaryKey(res.primaryKey || []);
         setCandidateKeys(res.candidateKeys || []);
         setMinimalCover(res.minimalCover || []);
-        setDataQuality(res.dataQuality || null);
 
         setDependencies(
           (res.dependencies || []).map(fd => ({
@@ -118,7 +111,7 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dataset Analysis & Functional Dependencies</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Candidate key discovery via attribute closure, dependency mining, and ML data quality diagnostics.
+            Candidate key discovery via attribute closure, dependency mining with violation rates, and column data profiling.
           </p>
         </div>
 
@@ -147,12 +140,12 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
         <div className="bg-white border border-slate-200 rounded-xl p-16 text-center text-slate-500">
           <RefreshCw className="w-8 h-8 mx-auto text-blue-600 animate-spin mb-4" />
           <h3 className="text-base font-semibold text-slate-800">Computing attribute closures & functional dependencies...</h3>
-          <p className="text-sm text-slate-500 mt-1">Evaluating determinants up to size 3, violation counts, and ML outlier isolation</p>
+          <p className="text-sm text-slate-500 mt-1">Evaluating determinants up to size 3, equivalence partitions, and non-minimal pruning</p>
         </div>
       ) : profileData ? (
         <>
           {/* Top Academic Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Candidate Keys (Closure)</span>
               <div className="mt-2.5 flex flex-wrap gap-2">
@@ -170,7 +163,7 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Minimal Cover (Fc)</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Canonical Minimal Cover (Fc)</span>
               <div className="mt-2.5 text-sm text-slate-700">
                 <span className="text-2xl font-bold font-mono text-indigo-600 mr-1.5">{minimalCover.length}</span>
                 <span className="font-medium">canonical rules</span>
@@ -179,26 +172,11 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Inferred FDs</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Inferred Dependencies</span>
               <div className="mt-2.5 text-sm text-slate-700">
                 <span className="text-2xl font-bold font-mono text-blue-600 mr-1.5">{dependencies.length}</span>
                 <span className="font-medium">rules inferred</span>
                 <p className="text-xs text-slate-400 mt-1">{dependencies.filter(d => d.isConfirmed).length} confirmed by user</p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Data Quality Score</span>
-              <div className="mt-2.5 flex items-center justify-between">
-                <div>
-                  <span className={`text-2xl font-bold font-mono ${
-                    (dataQuality?.qualityScore || 100) >= 80 ? 'text-emerald-600' : 'text-amber-600'
-                  }`}>
-                    {dataQuality?.qualityScore || 100}%
-                  </span>
-                  <p className="text-xs text-slate-400 mt-1">{dataQuality?.summary?.qualityRating || 'GOOD'} Rating</p>
-                </div>
-                <Sparkles className="w-5 h-5 text-amber-500" />
               </div>
             </div>
           </div>
@@ -228,18 +206,6 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
               <Microscope className="w-4 h-4" />
               <span>Column Profiles ({profileData.columns.length})</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab('ml_quality')}
-              className={`pb-3.5 transition-colors border-b-2 flex items-center space-x-2 ${
-                activeTab === 'ml_quality'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>ML Data Quality ({(dataQuality?.numericalAnomalies?.length || 0) + (dataQuality?.potentialDuplicates?.length || 0)})</span>
-            </button>
           </div>
 
           {/* TAB 1: FUNCTIONAL DEPENDENCIES */}
@@ -251,7 +217,7 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
                     Functional Dependencies ($X \to Y$) & Violation Statistics
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
-                    Determinants evaluated up to size 3. Toggle checkboxes to confirm as true business rules before synthesis.
+                    Determinants evaluated up to size 3. Toggle checkboxes to confirm as true business rules before decomposition.
                   </p>
                 </div>
 
@@ -403,107 +369,6 @@ const AnalysisPage = ({ activeDataset, onNavigate, onAnalysisComplete }) => {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: ML DATA QUALITY & SUSPICIOUS RECORDS */}
-          {activeTab === 'ml_quality' && dataQuality && (
-            <div className="space-y-6">
-              {/* Educational Notice Banner */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start space-x-3.5 text-sm text-amber-900">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold">Academic Principle: Machine Learning is Advisory Only</h4>
-                  <p className="mt-1 text-amber-800 leading-relaxed text-xs">
-                    In relational database theory, functional dependencies and candidate keys represent absolute semantic business rules.
-                    Machine learning identifies statistical data-quality anomalies and near-duplicate typos, but does <strong>not</strong> create database constraints automatically.
-                  </p>
-                </div>
-              </div>
-
-              {/* Isolation Forest Outliers */}
-              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">
-                      Isolation Forest Numerical Outliers ({dataQuality.numericalAnomalies.length})
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Multivariate anomalies detected across numerical feature spaces
-                    </p>
-                  </div>
-                  <span className="text-xs px-2.5 py-1 rounded-md bg-slate-100 font-mono text-slate-600 border border-slate-200">
-                    Evaluated: {dataQuality.numericalColumnsEvaluated.join(', ') || 'None'}
-                  </span>
-                </div>
-
-                <div className="p-6">
-                  {dataQuality.numericalAnomalies.length === 0 ? (
-                    <div className="text-center py-8 text-slate-400 text-sm">
-                      No numerical statistical outliers detected by Isolation Forest.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {dataQuality.numericalAnomalies.map((anomaly, idx) => (
-                        <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-mono font-bold text-slate-800">Row #{anomaly.rowIndex}</span>
-                              <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
-                                anomaly.severity === 'HIGH' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                              }`}>
-                                Anomaly Score: {anomaly.anomalyScore}
-                              </span>
-                            </div>
-                            <p className="text-slate-600 mt-1 font-medium text-xs">{anomaly.explanation}</p>
-                          </div>
-                          <div className="text-xs font-mono text-slate-500 max-w-sm truncate" title={JSON.stringify(anomaly.record)}>
-                            {JSON.stringify(anomaly.record)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Fuzzy Near-Duplicates */}
-              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">
-                      Fuzzy Near-Duplicate Records ({dataQuality.potentialDuplicates.length})
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Jaro-Winkler string similarity &ge; 85% with suspected typographical errors
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  {dataQuality.potentialDuplicates.length === 0 ? (
-                    <div className="text-center py-8 text-slate-400 text-sm">
-                      No suspicious near-duplicate records detected.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {dataQuality.potentialDuplicates.map((dup, idx) => (
-                        <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-sm space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 font-mono text-xs">
-                              Row #{dup.rowAIndex} vs Row #{dup.rowBIndex}
-                            </span>
-                            <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 font-mono text-xs font-bold">
-                              {dup.compositeSimilarity}% Similarity
-                            </span>
-                          </div>
-                          <p className="text-slate-600 font-medium text-xs">{dup.explanation}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           )}

@@ -10,6 +10,7 @@ import analysisRoutes from './routes/analysisRoutes.js';
 import normalizationRoutes from './routes/normalizationRoutes.js';
 import migrationRoutes from './routes/migrationRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
+import crudRoutes from './routes/crudRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +19,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -45,6 +46,7 @@ app.use('/api', analysisRoutes);
 app.use('/api', normalizationRoutes);
 app.use('/api', migrationRoutes);
 app.use('/api', exportRoutes);
+app.use('/api', crudRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -78,4 +80,3 @@ const startServer = async () => {
 };
 
 startServer();
-

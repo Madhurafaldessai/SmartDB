@@ -5,9 +5,9 @@ import {
   Microscope,
   Network,
   Cpu,
-  Download,
   Database,
-  ArrowRight,
+  Download,
+  Trash2,
   FileSpreadsheet
 } from 'lucide-react';
 
@@ -18,12 +18,13 @@ const Sidebar = ({ activeTab, setActiveTab, activeDataset }) => {
     { id: 'analysis', step: '2', label: 'Profiling & Dependencies', icon: Microscope, requiresDataset: true },
     { id: 'normalization', step: '3', label: '3NF Synthesis & Proofs', icon: Cpu, requiresDataset: true },
     { id: 'schema', step: '4', label: 'Schema Designer', icon: Network, requiresDataset: true },
-    { id: 'export', step: '5', label: 'MySQL Deliverables & ERD', icon: Download, requiresDataset: true },
+    { id: 'crud', step: '5', label: 'Generated DB (CRUD)', icon: Database, requiresDataset: true },
+    { id: 'export', step: '6', label: 'Deliverables & ERD', icon: Download, requiresDataset: true },
   ];
 
   return (
     <aside className="w-72 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 select-none border-r border-slate-800">
-      <div className="p-5 space-y-7">
+      <div className="p-5 space-y-6">
         {/* Navigation Group */}
         <div>
           <div className="px-3 mb-3 flex items-center justify-between">
@@ -119,7 +120,7 @@ const Sidebar = ({ activeTab, setActiveTab, activeDataset }) => {
       <div className="p-5 border-t border-slate-800/80 text-xs text-slate-400 space-y-1">
         <div className="flex items-center justify-between">
           <span className="font-medium text-slate-300">SmartDB Academic Engine</span>
-          <span className="font-mono text-slate-400">v2.4</span>
+          <span className="font-mono text-slate-400">DBMS 3NF</span>
         </div>
         <p className="text-slate-400 text-xs">Bernstein 3NF Synthesis & MySQL 8</p>
       </div>

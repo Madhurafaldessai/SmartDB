@@ -88,6 +88,14 @@ const ExportPage = ({ activeDataset, onNavigate }) => {
 
         {/* Quick Download Buttons */}
         <div className="flex items-center space-x-3">
+          <button
+            onClick={() => onNavigate('crud')}
+            className="inline-flex items-center space-x-2 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold shadow-xs transition-colors"
+          >
+            <Database className="w-4 h-4 text-blue-600" />
+            <span>Manage Records (CRUD)</span>
+          </button>
+
           <a
             href={excelUrl}
             download

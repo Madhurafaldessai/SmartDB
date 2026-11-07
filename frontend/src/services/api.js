@@ -38,6 +38,11 @@ export const getDatasetDetails = async (id) => {
   return response.data;
 };
 
+export const deleteDataset = async (id) => {
+  const response = await api.delete(`/datasets/${id}`);
+  return response.data;
+};
+
 export const analyzeDataset = async (id) => {
   const response = await api.post(`/datasets/${id}/analyze`);
   return response.data;
@@ -45,11 +50,6 @@ export const analyzeDataset = async (id) => {
 
 export const updateFunctionalDependencies = async (id, dependencies) => {
   const response = await api.put(`/datasets/${id}/dependencies`, { dependencies });
-  return response.data;
-};
-
-export const getDataQualityReport = async (id) => {
-  const response = await api.get(`/datasets/${id}/quality`);
   return response.data;
 };
 
@@ -73,8 +73,29 @@ export const getERDData = async (id) => {
   return response.data;
 };
 
-export const getAuditReport = async (id) => {
-  const response = await api.get(`/datasets/${id}/report`);
+// CRUD API for physical generated tables
+export const getGeneratedTables = async (id) => {
+  const response = await api.get(`/datasets/${id}/tables`);
+  return response.data;
+};
+
+export const getTableRecords = async (id, tableName, params = {}) => {
+  const response = await api.get(`/datasets/${id}/tables/${tableName}/records`, { params });
+  return response.data;
+};
+
+export const createRecord = async (id, tableName, record) => {
+  const response = await api.post(`/datasets/${id}/tables/${tableName}/records`, { record });
+  return response.data;
+};
+
+export const updateRecord = async (id, tableName, keys, updates) => {
+  const response = await api.put(`/datasets/${id}/tables/${tableName}/records`, { keys, updates });
+  return response.data;
+};
+
+export const deleteRecord = async (id, tableName, keys) => {
+  const response = await api.delete(`/datasets/${id}/tables/${tableName}/records`, { data: { keys } });
   return response.data;
 };
 

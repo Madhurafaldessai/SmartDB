@@ -1,6 +1,7 @@
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { getSystemPool } from '../config/database.js';
+import { getSystemPool, rootPool, closeDatasetPool } from '../config/database.js';
 import { parseUploadedFile } from '../services/fileParser.js';
 import { profileDataset } from '../services/dataProfiler.js';
 
@@ -39,8 +40,8 @@ export const uploadDatasetFile = async (req, res) => {
     // Insert column profiles
     for (const col of initialProfile.columns) {
       await systemPool.query(
-        `INSERT INTO dataset_columns (dataset_id, column_index, column_name, sanitized_name, detected_type, null_count, unique_count, is_candidate_key, sample_values)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO dataset_columns (dataset_id, column_index, column_name, sanitized_name, detected_type, null_count, unique_count, sample_values)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           datasetId,
           col.columnIndex,
@@ -49,7 +50,6 @@ export const uploadDatasetFile = async (req, res) => {
           col.detectedType,
           col.nullCount,
           col.uniqueCount,
-          col.isCandidateKey ? 1 : 0,
           JSON.stringify(col.sampleValues)
         ]
       );
@@ -148,3 +148,59 @@ export const getDatasetDetails = async (req, res) => {
   }
 };
 
+/**
+ * Permanently deletes a dataset, its physical MySQL database, file from disk, and metadata
+ */
+export const deleteDataset = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const systemPool = await getSystemPool();
+
+    const [datasets] = await systemPool.query(`SELECT * FROM datasets WHERE id = ?`, [id]);
+    if (datasets.length === 0) {
+      return res.status(404).json({ success: false, message: 'Dataset not found' });
+    }
+
+    const dataset = datasets[0];
+
+    // 1. Drop dynamic MySQL database if it exists
+    if (dataset.target_database) {
+      const dbName = dataset.target_database;
+      // Safety check: ensure database identifier is specifically a smartdb dataset database
+      if (/^smartdb_ds_[a-zA-Z0-9_]+$/.test(dbName)) {
+        try {
+          await closeDatasetPool(dbName);
+          const rootConn = await rootPool.getConnection();
+          await rootConn.query(`DROP DATABASE IF EXISTS \`${dbName}\``);
+          rootConn.release();
+          console.log(`[Dataset Cleanup] Successfully dropped physical database '${dbName}'`);
+        } catch (dbErr) {
+          console.warn(`[Dataset Cleanup Warning] Could not drop database '${dbName}':`, dbErr.message);
+        }
+      }
+    }
+
+    // 2. Remove physical uploaded file from backend/uploads
+    if (dataset.stored_filename) {
+      const filePath = path.resolve(UPLOADS_DIR, dataset.stored_filename);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileErr) {
+        console.warn(`[Dataset Cleanup Warning] Could not remove uploaded file:`, fileErr.message);
+      }
+    }
+
+    // 3. Delete from smartdb_system.datasets (ON DELETE CASCADE cleans all related metadata)
+    await systemPool.query(`DELETE FROM datasets WHERE id = ?`, [id]);
+
+    return res.json({
+      success: true,
+      message: `Dataset '${dataset.original_name}' and all associated physical tables and metadata have been permanently deleted.`
+    });
+  } catch (err) {
+    console.error('Error deleting dataset:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
