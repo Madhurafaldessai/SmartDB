@@ -218,3 +218,21 @@ export const updateFunctionalDependencies = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+export const getDataQualityReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const systemPool = await getSystemPool();
+    const [columns] = await systemPool.query(
+      `SELECT column_name, sanitized_name, detected_type, null_count, unique_count FROM dataset_columns WHERE dataset_id = ? ORDER BY column_index ASC`,
+      [id]
+    );
+    return res.json({
+      success: true,
+      columns
+    });
+  } catch (err) {
+    console.error('Error fetching quality report:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
