@@ -1,0 +1,10 @@
+order_id,order_date,customer_id,customer_name,customer_email,customer_city,customer_state,product_id,product_name,category,unit_price,quantity,discount_percent
+ORD-1001,2024-01-15,CUST-01,Alice Johnson,alice@gmail.com,Seattle,WA,PROD-501,Mechanical Keyboard,Electronics,120.00,2,0.05
+ORD-1001,2024-01-15,CUST-01,Alice Johnson,alice@gmail.com,Seattle,WA,PROD-502,Wireless Mouse,Electronics,45.00,1,0.00
+ORD-1002,2024-01-16,CUST-02,Bob Smith,bob@yahoo.com,Austin,TX,PROD-503,USB-C Monitor Hub,Electronics,85.00,1,0.10
+ORD-1003,2024-01-17,CUST-03,Carol White,carol@outlook.com,Denver,CO,PROD-501,Mechanical Keyboard,Electronics,120.00,1,0.00
+ORD-1003,2024-01-17,CUST-03,Carol White,carol@outlook.com,Denver,CO,PROD-504,Ergonomic Chair,Furniture,250.00,1,0.15
+ORD-1004,2024-01-18,CUST-02,Bob Smith,bob@yahoo.com,Austin,TX,PROD-502,Wireless Mouse,Electronics,45.00,3,0.05
+ORD-1005,2024-01-19,CUST-04,David Brown,david@gmail.com,Boston,MA,PROD-505,Standing Desk,Furniture,420.00,1,0.20
+ORD-1005,2024-01-19,CUST-04,David Brown,david@gmail.com,Boston,MA,PROD-503,USB-C Monitor Hub,Electronics,85.00,2,0.05
+

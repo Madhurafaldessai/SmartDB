@@ -1,0 +1,10 @@
+patient_id,patient_name,patient_dob,patient_phone,doctor_id,doctor_name,doctor_specialization,ward_id,ward_name,ward_capacity,admission_date,discharge_date,diagnosis,treatment_cost
+P001,Riya Sharma,1990-05-12,9876543210,D01,Dr. Mehta,Cardiology,W01,Cardiology Ward,20,2024-01-10,2024-01-18,Hypertension,15000.00
+P002,Arjun Nair,1975-08-23,9123456789,D02,Dr. Verma,Orthopedics,W02,Orthopedic Ward,15,2024-01-12,2024-01-20,Fracture,22000.00
+P003,Sneha Pillai,2001-02-15,9988776655,D01,Dr. Mehta,Cardiology,W01,Cardiology Ward,20,2024-01-14,2024-01-21,Arrhythmia,18500.00
+P004,Amit Joshi,1988-11-30,9871234560,D03,Dr. Rao,Neurology,W03,Neurology Ward,10,2024-01-15,2024-01-25,Migraine,12000.00
+P005,Priya Kapoor,1995-07-07,9765432100,D02,Dr. Verma,Orthopedics,W02,Orthopedic Ward,15,2024-01-16,2024-01-22,Knee Injury,19000.00
+P006,Rahul Desai,1982-03-19,9654321098,D04,Dr. Singh,Pulmonology,W04,Pulmonology Ward,12,2024-01-17,2024-01-24,Pneumonia,21000.00
+P007,Meena Kumar,1970-09-04,9543210987,D01,Dr. Mehta,Cardiology,W01,Cardiology Ward,20,2024-01-18,2024-01-28,Heart Failure,45000.00
+P008,Vikram Reddy,2005-12-20,9432109876,D03,Dr. Rao,Neurology,W03,Neurology Ward,10,2024-01-19,2024-01-26,Epilepsy,17500.00
+

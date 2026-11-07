@@ -1,0 +1,12 @@
+student_id,student_name,student_email,department_id,department_name,department_head,course_id,course_name,credits,instructor_name,semester,grade
+S101,Aarav Sharma,aarav@univ.edu,D01,Computer Science,Dr. Alan Turing,CS101,Data Structures,4,Prof. Knuth,Fall 2024,A
+S101,Aarav Sharma,aarav@univ.edu,D01,Computer Science,Dr. Alan Turing,CS102,Database Systems,3,Prof. Codd,Fall 2024,A-
+S102,Diya Patel,diya@univ.edu,D01,Computer Science,Dr. Alan Turing,CS101,Data Structures,4,Prof. Knuth,Fall 2024,B+
+S102,Diya Patel,diya@univ.edu,D01,Computer Science,Dr. Alan Turing,CS103,Operating Systems,4,Prof. Tanenbaum,Spring 2025,A
+S103,Rohan Verma,rohan@univ.edu,D02,Electronics,Dr. Claude Shannon,EC201,Digital Signals,3,Prof. Oppenheim,Fall 2024,B
+S103,Rohan Verma,rohan@univ.edu,D02,Electronics,Dr. Claude Shannon,EC202,Microprocessors,4,Prof. Hennessy,Spring 2025,A
+S104,Ananya Sen,ananya@univ.edu,D02,Electronics,Dr. Claude Shannon,EC201,Digital Signals,3,Prof. Oppenheim,Fall 2024,A
+S105,Kabir Mehta,kabir@univ.edu,D03,Mechanical Eng,Dr. James Watt,ME301,Thermodynamics,3,Prof. Carnot,Fall 2024,B+
+S105,Kabir Mehta,kabir@univ.edu,D03,Mechanical Eng,Dr. James Watt,ME302,Fluid Mechanics,4,Prof. Navier,Spring 2025,B
+S106,Neha Gupta,neha@univ.edu,D01,Computer Science,Dr. Alan Turing,CS102,Database Systems,3,Prof. Codd,Fall 2024,A+
+
